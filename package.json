@@ -43,7 +43,8 @@
     "ethereumjs-util": "^5.1.2",
     "wast2wasm": "0.0.1",
     "loglevel": "1.5.0",
-    "merkle-trie": "0.0.0"
+    "merkle-trie": "0.0.0",
+    "readable-stream": "2.3.3"
   },
   "standard": {
     "ignore": [
