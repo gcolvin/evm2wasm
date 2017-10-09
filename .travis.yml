@@ -1,14 +1,42 @@
+sudo: false
+os:
+  - linux
+
 language: node_js
-sudo: required
 node_js:
-  - "7"
+  - "8"
+
 before_install:
   - git submodule update --init
   - ./tools/wabt/scripts/travis-before-install.sh
   - cd ./tools/wabt/ && make
-script: npm test
+
 addons:
   apt:
     sources:
-    # add PPAs with more up-to-date toolchains
     - ubuntu-toolchain-r-test
+    packages:
+    - g++-4.8
+
+branches:
+  # We need to whitelist the branches which we want to have "push" automation.
+  # Pull request automation is not constrained to this set of branches.
+  only:
+  - master
+
+env:
+  global:
+    - DISPLAY=:99.0
+  matrix:
+    - CXX=g++-4.8 TEST_SUITE=testState
+
+matrix:
+  fast_finish: true
+  include:
+#    - os: linux
+#      node_js: "8"
+#      env: TEST_SUITE=lint
+    - os: linux
+      node_js: "8"
+      env: CXX=g++-4.8 TEST_SUITE=vmTests
+script: npm run $TEST_SUITE
