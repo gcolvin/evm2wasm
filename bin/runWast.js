@@ -17,10 +17,11 @@ main().then(function() {
 })
 
 async function main() {
-  const code = process.argv[2]
-  console.log('code:', code)
+  //const code = process.argv[2]
+  const code = Buffer.from(process.argv[2], 'hex')
+  console.log('code:', code.toString('hex'))
   const wasmCode = await transcompiler.evm2wasm(code, {
-                      stackTrace: false,
+                      stackTrace: true,
                       inlineOps: true,
                       pprint: false,
                       wabt: true
@@ -34,21 +35,26 @@ async function main() {
 
 function runWasmCode(wasmCode) {
   const mod = WebAssembly.Module(wasmCode)
-  const wasmImports = wasmImportThingie()
-  const instance = WebAssembly.Instance(mod, wasmImports)
+  let wasmVm = createVM()
+  let wasmImports = wasmImportThingie(wasmVm)
   //const instance = WebAssembly.Instance(mod, {}) //  TypeError: WebAssembly Instantiation: Import #0 module="ethereum" error: module is not an object or function
-  const val = instance.exports.main()
-  console.log('val:', val)
-  console.log(ethUtil.toBuffer(val).toString('hex'))
+  const instance = WebAssembly.Instance(mod, wasmImports)
+  wasmVm.wasmInstance = instance
+  
+  instance.exports.main()
 }
 
 
-function wasmImportThingie() {
 
+function createVM() {
   class VM {
     constructor() {
       //this._environment = new Environment({state: this})
       this._environment = new Environment()
+    }
+    
+    set wasmInstance (inst) {
+      this._instance = inst
     }
 
     get environment () {
@@ -56,12 +62,17 @@ function wasmImportThingie() {
     }
 
     get memory () {
+      //console.log('wasmImportThingie get memory()')
       return this._instance.exports.memory.buffer
     }
   }
 
-
   const wasmVm = new VM();
+  return wasmVm
+}
+
+
+function wasmImportThingie(wasmVm) {
 
   const interfaces = [Interface, DebugInterface]
 

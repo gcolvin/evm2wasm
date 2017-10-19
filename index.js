@@ -187,6 +187,7 @@ exports.evm2wast = function (evmCode, opts = {
   for (let i = 0; i < evmCode.length; i++) {
     const opint = evmCode[i]
     const op = opcodes(opint)
+    console.log('op:', op)
 
     let bytes
     gasCount += op.fee
@@ -262,6 +263,7 @@ exports.evm2wast = function (evmCode, opts = {
         segment += `(call $PC (i32.const ${i}))\n`
         break
       case 'PUSH':
+        console.log('got PUSH.')
         i++
         bytes = ethUtil.setLength(evmCode.slice(i, i += op.number), 32)
         const bytesRounded = Math.ceil(op.number / 8)
