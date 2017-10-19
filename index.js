@@ -83,6 +83,7 @@ exports.evm2wasm = function (evmCode, opts = {
   'testName': 'temp'
 }) {
   const wast = exports.evm2wast(evmCode, opts)
+  console.log('wast:', wast)
   const testName = opts.testName
   if (opts.wabt) {
     return new Promise((resolve, reject) => {
@@ -283,6 +284,7 @@ exports.evm2wast = function (evmCode, opts = {
         // do nothing
         break
       case 'STOP':
+        console.log('evm2wasm got STOP opcode')
         segment += '(br $done)'
         if (jumpFound) {
           i = findNextJumpDest(evmCode, i)
@@ -292,6 +294,7 @@ exports.evm2wast = function (evmCode, opts = {
         }
         break
       case 'SUICIDE':
+      //console.log('got SUICIDE opcode')
       case 'RETURN':
         segment += `(call $${op.name}) (br $done)\n`
         if (jumpFound) {
